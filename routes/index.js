@@ -1735,7 +1735,7 @@ const result = await resolveAfter2Seconds(i);
         }
     
 	  request({
-            uri: "https://wpqrcode1.herokuapp.com/send-message",
+           uri: "http://localhost:8100/send-message",
 	    method: "POST",
 	    body: JSON.stringify(linkRequest1),
 	    headers: requestHeaders1
@@ -1860,7 +1860,7 @@ const result = await resolveAfter2Seconds(i);
       }
  
   request({
-    uri: "https://vlcode2.herokuapp.com/send-message",
+    uri: "http://localhost:8200/send-message",
     method: "POST",
     body: JSON.stringify(linkRequest1),
     headers: requestHeaders1
@@ -1978,7 +1978,7 @@ const result = await resolveAfter2Seconds(i);
         }
     
 	  request({
-            uri: "https://wpqrcode1.herokuapp.com/send-media",
+            uri: "http://localhost:8100/send-message",
 	    method: "POST",
 	    body: JSON.stringify(linkRequest1),
 	    headers: requestHeaders1
@@ -2094,7 +2094,7 @@ const result = await resolveAfter2Seconds(i);
         }
     
 	  request({
-            uri: "https://vlcode2.herokuapp.com/send-media",
+            uri: "http://localhost:8200/send-message",
 	    method: "POST",
 	    body: JSON.stringify(linkRequest1),
 	    headers: requestHeaders1
