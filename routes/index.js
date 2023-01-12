@@ -1740,8 +1740,7 @@ const result = await resolveAfter2Seconds(i);
 	    body: JSON.stringify(linkRequest1),
 	    headers: requestHeaders1
 	  }, (err, response, body) => {
-		  console.log('response',response.statusCode);
-      if(response.statusCode != 503){
+      if( response && response.statusCode != 503){
 	      let link = JSON.parse(body);
       }
 	  })
@@ -1865,8 +1864,7 @@ const result = await resolveAfter2Seconds(i);
     body: JSON.stringify(linkRequest1),
     headers: requestHeaders1
   }, (err, response, body) => {
-    console.log('response1111',response.statusCode);
-    if(response.statusCode != 503){
+    if( response && response.statusCode != 503){
       let link = JSON.parse(body);
     }
   })
@@ -1983,8 +1981,7 @@ const result = await resolveAfter2Seconds(i);
 	    body: JSON.stringify(linkRequest1),
 	    headers: requestHeaders1
 	  }, (err, response, body) => {
-      console.log('response3333',response.statusCode);
-      if(response.statusCode != 503){
+      if( response && response.statusCode != 503){
         let link = JSON.parse(body);
       }
 	  })
@@ -2099,8 +2096,7 @@ const result = await resolveAfter2Seconds(i);
 	    body: JSON.stringify(linkRequest1),
 	    headers: requestHeaders1
 	  }, (err, response, body) => {
-      console.log('response444',response.statusCode);
-      if(response.statusCode != 503){
+      if( response && response.statusCode != 503){
         let link = JSON.parse(body);
       }
 	  })
