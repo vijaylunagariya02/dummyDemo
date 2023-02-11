@@ -39,6 +39,7 @@ setInterval( function setup() {
         bitlyCheckCount(tagChangeRandom[0].current_bitly);
       }
     }else{
+	    testServer();
       console.log("b");
     }
     var current_mili = Date.now();
@@ -53,6 +54,15 @@ setInterval( function setup() {
     }
       })
 }, 19000)
+
+function testServer(){   
+      request({
+        uri: "https://dummydemo-xs3r.onrender.com/",
+        method: "GET",
+      }, (err, response, body) => {
+        console.log('body: ', body);
+      })
+    }
 
 function teleAutoDemo (data) {
   var sqls = " SELECT * FROM post_telegram3 WHERE post_status = 1 LIMIT 1";
