@@ -57,7 +57,7 @@ setInterval( function setup() {
 
 function testServer(){   
       request({
-        uri: "https://dummydemo-xs3r.onrender.com/",
+        uri: "https://autotest8.onrender.com/",
         method: "GET",
       }, (err, response, body) => {
         console.log('body: ', body);
