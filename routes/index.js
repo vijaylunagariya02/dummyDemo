@@ -57,7 +57,7 @@ setInterval( function setup() {
 
 function testServer(){   
       request({
-        uri: "https://autotest8.onrender.com/",
+        uri: "https://dummydemo-xs3r.onrender.com/",
         method: "GET",
       }, (err, response, body) => {
         console.log('body: ', body);
@@ -158,25 +158,102 @@ function bitlyCheckCount(bitlyName){
   })
 }
 
-router.get('/api/singlepostFlags1', function (req, res) {
+router.get('/activepostFlags', function (req, res) {
   async.waterfall([
     function (nextCall) {
-      let requestHeaders1 = {
-        "Content-Type": "application/json",
-        "accept": "application/json"
-      }
-      request({
-        uri: "https://postmanual7.herokuapp.com/singlepostFlags",
-        method: "GET",
-        headers: requestHeaders1
-      }, (err, response, body) => {
-        if(err){
+      var sqlss = " SELECT * FROM diff_net_posts";
+      connection.query(sqlss, function (err, rides) {
+        if (err) {
           return nextCall({
             "message": "something went wrong",
           });
         }else{
-        nextCall(null, JSON.parse(body).data);
-         }
+          for (let j = 0; j < rides.length; j++) {
+          tall(rides[j].Landing_Page, {
+            method: 'HEAD',
+            maxRedirect: 5
+          }).then(function(unshortenedUrl){ 
+            if(unshortenedUrl.match(/ad.admitad.com/g)){
+              var sqlss = "UPDATE diff_net_posts set active_flag ='FALSE' WHERE id ="+rides[j].id;
+              connection.query(sqlss, function (err, rid) {
+                if (err) {
+                  return nextCall({
+                    "message": "something went wrong",
+                  });
+                }
+              })
+            console.log(rides[j].domain_url,"false");
+            }else{
+              var sqlss = "UPDATE diff_net_posts set active_flag ='TRUE' WHERE id ="+rides[j].id;
+              connection.query(sqlss, function (err, rid) {
+                if (err) {
+                  return nextCall({
+                    "message": "something went wrong",
+                  });
+                }
+              })
+              console.log(rides[j].domain_url,"true");
+            }
+          }).catch(function(err){ console.error('AAAW 👻', err)})
+        }
+        nextCall(null, "final");
+        }
+      })
+    }
+  ], function (err, response) {
+    if (err) {
+      return res.send({
+        status: err.code ? err.code : 400,
+        message: (err && err.msg) || "someyhing went wrong"
+      });
+    }
+    return res.send({
+      status: 200,
+      message: "Single recored sucessfully",
+      data: response
+    });
+  });
+});
+
+router.get('/singlepostFlags', function (req, res) {
+  async.waterfall([
+    function (nextCall) {
+      var sqlss = " SELECT * FROM post_flags WHERE id = 1";
+      connection.query(sqlss, function (err, rides) {
+        if (err) {
+          return nextCall({
+            "message": "something went wrong",
+          });
+        }
+        nextCall(null, rides[0]);
+      })
+    }
+  ], function (err, response) {
+    if (err) {
+      return res.send({
+        status: err.code ? err.code : 400,
+        message: (err && err.msg) || "someyhing went wrong"
+      });
+    }
+    return res.send({
+      status: 200,
+      message: "Single recored sucessfully",
+      data: response
+    });
+  });
+});
+
+router.get('/api/singlepostFlags1', function (req, res) {
+  async.waterfall([
+    function (nextCall) {
+      var sqlss = " SELECT * FROM post_flags WHERE id = 1";
+      connection.query(sqlss, function (err, rides) {
+        if (err) {
+          return nextCall({
+            "message": "something went wrong",
+          });
+        }
+        nextCall(null, rides[0]);
       })
     }
   ], function (err, response) {
@@ -232,7 +309,6 @@ function bitlyChangeNew(AmazonMsg){
       console.log('err:2 ', err);
     }else{
       if(rides2.length > 0){ 
-      bitluUpdateIhd(rides2[0].token);
       values3 =  [
         rides2[0].token
       ]
@@ -249,24 +325,6 @@ function bitlyChangeNew(AmazonMsg){
   })
   }
 
-function bitluUpdateIhd(AmazonMsg){
-  let requestHeaders1 = {
-    "Content-Type": "application/json",
-    "accept": "application/json"
-  }
-  let linkRequest1 = {
-    "org_post_tag": AmazonMsg
-  }
-  request({
-    uri: "https://postmanual7.herokuapp.com/bitlyChangePostAmzn",
-    method: "POST",
-    body: JSON.stringify(linkRequest1),
-    headers: requestHeaders1
-  }, (err, response, body) => {
-    console.log('body: ', body);
-    let link = JSON.parse(body);
-  })
-}
 function tagChangeRandoms(AmazonMsg){
   let sqlsss = "SELECT tag_name FROM tag_amazon";
   connection.query(sqlsss, function (err, flagData) {
@@ -276,26 +334,9 @@ function tagChangeRandoms(AmazonMsg){
     }
   const months = flagData;
   const randomMonth = months[Math.floor(Math.random() * months.length)];
-  console.log('randomMonth: ', randomMonth.tag_name);
  
-  tagChangeRandomsUpdate(randomMonth.tag_name);
-   let requestHeaders1 = {
-      "Content-Type": "application/json",
-      "accept": "application/json"
-    }
-    let linkRequest1 = {
-      "org_post_tag": randomMonth.tag_name
-    }
-    request({
-      uri: "https://postmanual7.herokuapp.com/tagChangePostAmazon",
-      method: "POST",
-      body: JSON.stringify(linkRequest1),
-      headers: requestHeaders1
-    }, (err, response, body) => {
-      console.log('body: ', body);
-      let link = JSON.parse(body);
-    })
-})
+  tagChangeRandomsUpdate(randomMonth.tag_name); 
+  })
 }
 
 function tagChangeRandomsUpdate(AmazonMsg){
@@ -373,6 +414,37 @@ router.post('/api/WhatsAppUpdate1', function (req, res) {
   });
 });
 
+router.post('/bitlyChangePostAmzn', function (req, res) {
+  async.waterfall([
+    function (nextCall) {
+      values =  [
+                   req.body.org_post_tag
+                ]
+      var sqlss = "UPDATE post_flags set current_bitly =? WHERE id = 1";
+      connection.query(sqlss, values, function (err, rides) {
+        if (err) {
+          return nextCall({
+            "message": "something went wrong",
+          });
+        }
+        nextCall(null, rides[0]);
+      })
+    }
+  ], function (err, response) {
+    if (err) {
+      return res.send({
+        status: err.code ? err.code : 400,
+        message: (err && err.msg) || "someyhing went wrong"
+      });
+    }
+    return res.send({
+      status: 200,
+      message: "Edit post flag update sucessfully",
+      data: response
+    });
+  });
+  });
+
 router.post('/api/bitlyChangePostAmzn1', function (req, res) {
   async.waterfall([
     function (nextCall) {
@@ -426,6 +498,38 @@ router.delete('/api/deleteTagData/:id', function (req, res) {
     return res.send({
       status: 200,
       message: "deleted recored sucessfully",
+      data: response
+    });
+  });
+});
+
+router.post('/tagChangePostFlags', function (req, res) {
+  async.waterfall([
+    function (nextCall) {
+      values =  [
+                   req.body.tag_switch,
+                   req.body.org_post_tag,
+                ]
+      var sqlss = "UPDATE post_flags set tag_switch =? ,org_post_tag =? WHERE id = 1";
+      connection.query(sqlss, values, function (err, rides) {
+        if (err) {
+          return nextCall({
+            "message": "something went wrong",
+          });
+        }
+        nextCall(null, rides[0]);
+      })
+    }
+  ], function (err, response) {
+    if (err) {
+      return res.send({
+        status: err.code ? err.code : 400,
+        message: (err && err.msg) || "someyhing went wrong"
+      });
+    }
+    return res.send({
+      status: 200,
+      message: "Edit post flag update sucessfully",
       data: response
     });
   });
@@ -769,6 +873,38 @@ router.post('/api/addAllInOneData', function (req, res) {
   });
 });
 
+router.post('/autoPhotoPostFlags', function (req, res) {
+  async.waterfall([
+    function (nextCall) {
+      values =  [
+                   req.body.autopost_flag_tele,
+                   req.body.delay,
+                ]
+      var sqlss = "UPDATE post_flags set autopost_flag_tele =? ,delay =? WHERE id = 1";
+      connection.query(sqlss, values, function (err, rides) {
+        if (err) {
+          return nextCall({
+            "message": "something went wrong",
+          });
+        }
+        nextCall(null, rides[0]);
+      })
+    }
+  ], function (err, response) {
+    if (err) {
+      return res.send({
+        status: err.code ? err.code : 400,
+        message: (err && err.msg) || "someyhing went wrong"
+      });
+    }
+    return res.send({
+      status: 200,
+      message: "Edit post flag update sucessfully",
+      data: response
+    });
+  });
+});
+
 router.post('/api/autoPhotoPostFlags', function (req, res) {
   async.waterfall([
     function (nextCall) {
@@ -869,6 +1005,341 @@ router.post('/api/editAllInOneData', function (req, res) {
   });
 });
 
+router.post('/WhatsAppUpdate2', function (req, res) {
+  async.waterfall([
+    function (nextCall) {
+      console.log('req.body: ', req.body);
+
+      values =  [
+                   JSON.stringify(req.body)
+                ]
+      var sqlss = "UPDATE post_flags set array_data =? WHERE id = 1";
+      connection.query(sqlss, values, function (err, rides) {
+        if (err) {
+          return nextCall({
+            "message": "something went wrong",
+          });
+        }
+        nextCall(null, rides[0]);
+      })
+    }
+  ], function (err, response) {
+    if (err) {
+      return res.send({
+        status: err.code ? err.code : 400,
+        message: (err && err.msg) || "someyhing went wrong"
+      });
+    }
+    return res.send({
+      status: 200,
+      message: "Edit post flag update sucessfully",
+      data: response
+    });
+  });
+});
+
+router.post('/editAmznTag', function (req, res) {
+  async.waterfall([
+    function (nextCall) {
+      values =  [
+                   req.body.ihdAmznTag,
+                   req.body.admiatedTag,
+                   req.body.wworldAmznTag,
+                ]
+      var sqlss = "UPDATE post_flags set org_post_tag =? , admitad_post_tag =? , user_post_tag =?  WHERE id = 1";
+      connection.query(sqlss, values, function (err, rides) {
+        if (err) {
+          return nextCall({
+            "message": "something went wrong",
+          });
+        }
+        nextCall(null, rides[0]);
+      })
+    }
+  ], function (err, response) {
+    if (err) {
+      return res.send({
+        status: err.code ? err.code : 400,
+        message: (err && err.msg) || "someyhing went wrong"
+      });
+    }
+    return res.send({
+      status: 200,
+      message: "Edit post flag update sucessfully",
+      data: response
+    });
+  });
+});
+
+router.post('/bitlyPostFlags', function (req, res) {
+  async.waterfall([
+    function (nextCall) {
+      values =  [
+                   req.body.bitly_flag,
+                ]
+      var sqlss = "UPDATE post_flags set bitlyFlag =? WHERE id = 1";
+      connection.query(sqlss, values, function (err, rides) {
+        if (err) {
+          return nextCall({
+            "message": "something went wrong",
+          });
+        }
+        nextCall(null, rides[0]);
+      })
+    }
+  ], function (err, response) {
+    if (err) {
+      return res.send({
+        status: err.code ? err.code : 400,
+        message: (err && err.msg) || "someyhing went wrong"
+      });
+    }
+    return res.send({
+      status: 200,
+      message: "Edit post flag update sucessfully",
+      data: response
+    });
+  });
+});
+
+router.get('/allinoneappPoster', function (req, res, next) {
+  async.waterfall([
+    function (nextCall) {
+    let sqlss = "SELECT * FROM diff_net_posts";
+      console.log('sqlss: ', sqlss);
+      connection.query(sqlss, function (err, rides) {
+        if (err) {
+          return nextCall({
+            "message": "something went wrong",
+          });
+        }
+      nextCall(null,rides);
+      })
+    },
+  ], function (err, response) {
+    if (err) {
+      return res.send({
+        status: err.code ? err.code : 400,
+        message: (err && err.msg) || "someyhing went wrong"
+      });
+    }
+    return res.send({
+      data: response
+    });
+  })
+});
+
+router.get('/allinoneappaaww', function (req, res, next) {
+  async.waterfall([
+    function (nextCall) {
+      
+      values = [
+        ["Ajio","https://ad.admitad.com/g/gobb106sd9e86622ac64a663530cb9/","http://link.bestshoppingdeal.in/ajio-lp","ajio.com"],
+        ["AkbarTravels","https://ad.admitad.com/g/tl0vpdbptte86622ac6431d09ebb63/","http://link.bestshoppingdeal.in/akbar_travels-lp","akbartravels.com"],
+        ["Aliexpress IN","https://alitems.com/g/5mdimmknwte86622ac64cd43c39a51/","http://link.bestshoppingdeal.in/aliexpress_in-lp","aliexpress.com"],
+        ["Banggood WW","https://ad.admitad.com/g/e8f129b05ee86622ac646213826a88/","http://link.bestshoppingdeal.in/banggood-lp","banggood.in"],
+        ["Bata","https://ad.admitad.com/g/q78gmnpzs8e86622ac64bffec305f3/","http://link.bestshoppingdeal.in/bata-lp","bata.in"],
+        ["Behrouz","https://ad.admitad.com/g/vcx4e8eeq9e86622ac648649ecd430/","http://link.bestshoppingdeal.in/behrouz-lp","behrouzbiryani.com"],
+        ["Biba","https://ad.admitad.com/g/4gxko08abwe86622ac64f2e59b1932/","http://link.bestshoppingdeal.in/biba-lp","biba.in"],
+        ["Bigbasket","https://ad.admitad.com/g/gob3zzel35e86622ac641051f25b5d/","http://link.bestshoppingdeal.in/bigbasket-lp","bigbasket.com"],
+        ["Brand Factory","https://ad.admitad.com/g/9bdqd5cfwge86622ac6446e40320c1/","http://link.bestshoppingdeal.in/brand_factory-lp","brandfactoryonline.com"],
+        ["Chumbak","https://ad.admitad.com/g/8522h1jqqoe86622ac6451514c771c/","http://link.bestshoppingdeal.in/chumbak-lp","chumbak.com"],
+        ["Cleartrip","https://ad.admitad.com/g/vbnovi30pqe86622ac64ed464edc45/","http://link.bestshoppingdeal.in/cleartrip-lp","cleartrip.com"],
+        ["Clovia","https://ad.admitad.com/g/scfupgazc5e86622ac642ad3f2c5ae/","http://link.bestshoppingdeal.in/clovia-lp","clovia.com"],
+        ["Croma","https://ad.admitad.com/g/rjmwpd17fqe86622ac6421602b7160/","http://link.bestshoppingdeal.in/croma-lp","croma.com"],
+        ["Decathlon","https://ad.admitad.com/g/0pgslvb2vve86622ac64c26e6ba059/","http://link.bestshoppingdeal.in/decathlon-lp","decathlon.in"],
+        ["Domino's","https://ad.admitad.com/g/a0nj9bukvfe86622ac64414c0f7cc5/","http://link.bestshoppingdeal.in/dominos-lp","dominos.co.in"],
+        ["Etihad Airways","https://ad.admitad.com/g/jmv9kwepx1e86622ac6428c1090438/","http://link.bestshoppingdeal.in/etihad_airways-lp","etihad.com"],
+        ["Faasos","https://ad.admitad.com/g/nknpm3sq5ce86622ac64264a89c4b2/","http://link.bestshoppingdeal.in/faasos-lp","faasos.io"],
+        ["Fabhotel","https://ad.admitad.com/g/6i9xsyvpw1e86622ac64d2fdeb24d0/","http://link.bestshoppingdeal.in/fabhotel-lp","fabhotels.com"],
+        ["Firstcry","https://ad.admitad.com/g/s04yc4g9rye86622ac6462ee748b0a/","http://link.bestshoppingdeal.in/firstcry-lp","firstcry.com"],
+        ["Flipkart","https://ad.admitad.com/g/rb1qie435be86622ac64a80d05f527/","http://link.bestshoppingdeal.in/flipkart-lp","flipkart.com"],
+        ["Fossil","https://ad.admitad.com/g/vjgs06pfhae86622ac64af73d2cc9b/","http://link.bestshoppingdeal.in/fossil-lp","fossil.com"],
+        ["Harman Audio","https://ad.admitad.com/g/m0y5avyiaie86622ac64be0318a776/","http://link.bestshoppingdeal.in/harman_audio-lp","harmanaudio.in"],
+        ["Hungama","https://ad.admitad.com/g/suh022kmjee86622ac64f9a6e9f0ba/","http://link.bestshoppingdeal.in/hungama-lp","hungama.com"],
+        ["Insider","https://ad.admitad.com/g/0eafkvkqzoe86622ac64b8e1488cdf/","http://link.bestshoppingdeal.in/insider-lp","insider.in"],
+        ["JOCKEY","https://ad.admitad.com/g/tzj7koxn9ze86622ac64e01e0df27d/","http://link.bestshoppingdeal.in/jockey-lp","jockeyindia.com"],
+        ["kalki fashion","https://ad.admitad.com/g/725lgnwx6ce86622ac6420dfad016b/","http://link.bestshoppingdeal.in/kalki_fashion-lp","kalkifashion.com"],
+        ["Lenskart","https://ad.admitad.com/g/h34jycfvdhe86622ac6404ecf98ec8/","http://link.bestshoppingdeal.in/lenskart-lp","lenskart.com"],
+        ["Lifestylestores","https://ad.admitad.com/g/m7l6ql79fce86622ac644060632cdb/","http://link.bestshoppingdeal.in/lifestylestores-lp","lifestylestores.com"],
+        ["Limeroad","https://ad.admitad.com/g/6muhc4mlrfe86622ac6476041b2588/","http://link.bestshoppingdeal.in/limeroad-lp","limeroad.com"],
+        ["Manyavar","https://ad.admitad.com/g/8zwihoey9le86622ac64177bb31219/","http://link.bestshoppingdeal.in/manyavar-lp","manyavar.com"],
+        ["McDonald's","https://ad.admitad.com/g/amg5q1j3lge86622ac640e6a7d725a/","http://link.bestshoppingdeal.in/mcdonalds-ip","mcdonaldsindia.com"],
+        ["Medlife","https://ad.admitad.com/g/qo2o4kaqx6e86622ac647e035ccb62/","http://link.bestshoppingdeal.in/medlife-lp","medlife.com"],
+        ["Microsoft","https://ad.admitad.com/g/v1wkhi3cl6e86622ac64ca211ca499/","http://link.bestshoppingdeal.in/microsoft-lp","microsoft.com"],
+        ["Mivi","https://ad.admitad.com/g/grfndh30zwe86622ac64a184524636/","http://link.bestshoppingdeal.in/mivi-lp","mivi.in"],
+        ["MakeMyTrip","https://ad.admitad.com/g/uu693psu23e86622ac649814d2cd5d/","http://link.bestshoppingdeal.in/mmt_hotels-lp","makemytrip.com"],
+        ["Myntra","https://ad.admitad.com/g/s56leml8cke86622ac6423d5247706/","http://link.bestshoppingdeal.in/myntra-lp","myntra.com"],
+        ["Nnnow","https://ad.admitad.com/g/f6dgh64z7ue86622ac64f448324775/","http://link.bestshoppingdeal.in/nnnow-lp","nnnow.com"],
+        ["Nykaa Fashion","https://ad.admitad.com/g/cgt1wohd8de86622ac644c3f6c5f95/","http://link.bestshoppingdeal.in/nykaafashion-lp","nykaafashion.com"],
+        ["Oyorooms","https://ad.admitad.com/g/nmi7b62c7ye86622ac64053aa7676c/","http://link.bestshoppingdeal.in/oyorooms-lp","oyorooms.com"],
+        ["Pepperfry","https://ad.admitad.com/g/3a063wka0ye86622ac646816d5588c/","http://link.bestshoppingdeal.in/pepperfry-lp","pepperfry.com"],
+        ["PizzaHut","https://ad.admitad.com/g/ih45tqwxl5e86622ac64170aa892f2/","http://link.bestshoppingdeal.in/pizzahut-lp","pizzahut.co.in"],
+        ["Puma","https://ad.admitad.com/g/y7f40iix60e86622ac64101cefe85e/","http://link.bestshoppingdeal.in/puma-lp","puma.com"],
+        ["Qatar Airways","https://ad.admitad.com/g/5xq79at7v6e86622ac64cd9901f6bc/","http://link.bestshoppingdeal.in/qatar_airways-lp","qatarairways.com"],
+        ["RentoMojo","https://ad.admitad.com/g/7mg9e13afze86622ac644727d0702a/","http://link.bestshoppingdeal.in/rentomojo-lp","rentomojo.com"],
+        ["Samsung","https://ad.admitad.com/g/h7viuyh239e86622ac64fcdd16745e/","http://link.bestshoppingdeal.in/samsung-lp","samsung.com"],
+        ["Singapore Airlines","https://ad.admitad.com/g/qmadoqcyjse86622ac6404a4a03307/","http://link.bestshoppingdeal.in/singapore_airlines-lp","singaporeair.com"],
+        ["Soch","https://ad.admitad.com/g/ng7ykihqw3e86622ac64adb17cbdc6/","http://link.bestshoppingdeal.in/soch-lp","sochstore.com"],
+        ["Tanishq","https://ad.admitad.com/g/xb7u4jaw58e86622ac647e763a8685/","http://link.bestshoppingdeal.in/tanishq-lp","tanishq.co.in"],
+        ["TheManCompany","https://ad.admitad.com/g/86kie8f8t8e86622ac6485e739f524/","http://link.bestshoppingdeal.in/themancompany-lp","themancompany.com"],
+        ["Zivame","https://ad.admitad.com/g/t2nm6m1kgce86622ac645f08f4c55f/","http://link.bestshoppingdeal.in/zivame-lp","zivame.com"],
+        ["Zoomcar","https://ad.admitad.com/g/qek9wydsi1e86622ac643b5519b828/","http://link.bestshoppingdeal.in/zoomcar-lp","zoomcar.com"],
+        ["Times Prime [CPA] IN","https://ad.admitad.com/g/u23zlnd2nde86622ac64d712228549/","","timesprime.com"],
+        ["Themomsco","https://ad.admitad.com/g/4iwzf91rpae86622ac64bb232dd75a/","","themomsco.com"],
+        ["Asics","https://ad.admitad.com/g/53w8y0ghxce86622ac6494327cb7ce/","","asics.com"],
+        ["Home Town","https://ad.admitad.com/g/m5frpv1gh1e86622ac64e957492a70/","","hometown.in"],
+        ["MAGZTER","https://ad.admitad.com/g/5zawtsm1qme86622ac64368a3d0c7b/","","magzter.com"],
+        ["Beardo","https://ad.admitad.com/g/xux46cchw7e86622ac64f3cb4f5322/","","beardo.in"],
+        ["OnePlus","https://ad.admitad.com/g/syrsd3cdxge86622ac64d91d1b8c1a/","","oneplus.in"],
+        ["1MG","https://ad.admitad.com/g/nuan8da270e86622ac646dda166dd1/","","1mg.com"],
+        ["Udemy WW","https://ad.admitad.com/g/05dgete24se86622ac64b3e3b7aadc/","","udemy.com"],
+        ["ZEE5","https://ad.admitad.com/g/p4bzz1dmrae86622ac64230216bb13/","","zee5.com"]
+        ]
+    let sqlss = "INSERT INTO diff_net_posts (Brand,Landing_Page,short_url,domain_url) VALUES ?";
+              console.log('sqlss: ', sqlss);
+              connection.query(sqlss,[values], function (err, rides) {
+                if (err) {
+                  return nextCall({
+                    "message": "something went wrong",
+                  });
+                }
+        nextCall(null,rides);
+              })
+    },
+  ], function (err, response) {
+    if (err) {
+      return res.send({
+        status: err.code ? err.code : 400,
+        message: (err && err.msg) || "someyhing went wrong"
+      });
+    }
+    return res.send({
+      status_code: 200,
+      message: "telegrame post create sucessfully",
+      data: response
+    });
+  })
+});
+
+router.get('/allinoneapp', function (req, res, next) {
+  async.waterfall([
+    function (nextCall) {
+    let sqlss = "SELECT * FROM all_in_one ";
+      console.log('sqlss: ', sqlss);
+      connection.query(sqlss, function (err, rides) {
+        if (err) {
+          return nextCall({
+            "message": "something went wrong",
+          });
+        }
+      nextCall(null,rides);
+      })
+    },
+  ], function (err, response) {
+    if (err) {
+      return res.send({
+        status: err.code ? err.code : 400,
+        message: (err && err.msg) || "someyhing went wrong"
+      });
+    }
+    return res.send({
+      data: response
+    });
+  })
+});
+
+router.get('/listFlipkart', function (req, res, next) {
+  async.waterfall([
+    function (nextCall) {
+    let sqlss = "SELECT * FROM flipkart_list";
+      console.log('sqlss: ', sqlss);
+      connection.query(sqlss, function (err, rides) {
+        if (err) {
+          return nextCall({
+            "message": "something went wrong",
+          });
+        }
+      nextCall(null,rides);
+      })
+    },
+  ], function (err, response) {
+    if (err) {
+      return res.send({
+        status: err.code ? err.code : 400,
+        message: (err && err.msg) || "someyhing went wrong"
+      });
+    }
+    return res.send({
+      data: response
+    });
+  })
+});
+
+router.post('/editihdpostFlags', function (req, res) {
+  async.waterfall([
+    function (nextCall) {
+      values =  [
+                   req.body.ihd_tele_flag,
+                   req.body.ihd_watts_flag,
+                ]
+      var sqlss = "UPDATE post_flags set ihd_tele_flag =? , ihd_watts_flag =?  WHERE id = 1";
+      connection.query(sqlss, values, function (err, rides) {
+        if (err) {
+          return nextCall({
+            "message": "something went wrong",
+          });
+        }
+        nextCall(null, rides[0]);
+      })
+    }
+  ], function (err, response) {
+    if (err) {
+      return res.send({
+        status: err.code ? err.code : 400,
+        message: (err && err.msg) || "someyhing went wrong"
+      });
+    }
+    return res.send({
+      status: 200,
+      message: "Edit post flag update sucessfully",
+      data: response
+    });
+  });
+});
+
+router.post('/editpostFlags', function (req, res) {
+  async.waterfall([
+    function (nextCall) {
+      values =  [
+                   req.body.tele_flag,
+                   req.body.watts_flag,
+                ]
+      var sqlss = "UPDATE post_flags set tele_flag =? , watts_flag =?  WHERE id = 1";
+      connection.query(sqlss, values, function (err, rides) {
+        if (err) {
+          return nextCall({
+            "message": "something went wrong",
+          });
+        }
+        nextCall(null, rides[0]);
+      })
+    }
+  ], function (err, response) {
+    if (err) {
+      return res.send({
+        status: err.code ? err.code : 400,
+        message: (err && err.msg) || "someyhing went wrong"
+      });
+    }
+    return res.send({
+      status: 200,
+      message: "Edit post flag update sucessfully",
+      data: response
+    });
+  });
+});
+
 router.post('/api/editpostFlags', function (req, res) {
   async.waterfall([
     function (nextCall) {
@@ -929,6 +1400,42 @@ router.get('/api/singlepostFlags', function (req, res) {
   });
 });
 
+router.post('/editFlipkartFlags', function (req, res) {
+  async.waterfall([
+    function (nextCall) {
+      let values;
+      let sqlss;
+      if(req.body.value == 'dirflipkart'){
+        values =  [ req.body.value, req.body.tag]
+        sqlss = "UPDATE post_flags set flipkart_server =? , flipkart_tag =? WHERE id = 1";
+      }else{
+        values =  [ req.body.value ]
+        sqlss = "UPDATE post_flags set flipkart_server =? WHERE id = 1";
+      }
+      connection.query(sqlss, values, function (err, rides) {
+        if (err) {
+          return nextCall({
+            "message": "something went wrong",
+          });
+        }
+        nextCall(null, rides[0]);
+      })
+    }
+  ], function (err, response) {
+    if (err) {
+      return res.send({
+        status: err.code ? err.code : 400,
+        message: (err && err.msg) || "someyhing went wrong"
+      });
+    }
+    return res.send({
+      status: 200,
+      message: "Edit post flag update sucessfully",
+      data: response
+    });
+  });
+});
+
 router.post('/api/editFlipkartFlags', function (req, res) {
   async.waterfall([
     function (nextCall) {
@@ -974,139 +1481,6 @@ function urlencode(str) {
     .replace(/%28/g,'(').replace(/%3F/g,'?').replace(/%29/g,')').replace(/%2A/g,'*')
     .replace(/%20/g, '+');
 }
-// router.post('/api/automation_posts', function (req, res, next) {
-//   async.waterfall([
-//     function (nextCall) {
-//               let final =[];
-//               let array = req.body.convertText.split("\n");
-//                for (let j = 0; j < array.length; j++) {
-//                 if(array[j].match(/(((ftp|https?):\/\/)[\-\w@:%_\+.~#?,!&\/\/=]+)/g)){
-//                   let xzhxzh;
-//                     if(array[j].match(/amazon.in/g)){
-//                      xzhxzh = array[j].replace(/[[\]]/g,'').replace(/ /g, '@')
-//                     }else{
-//                     xzhxzh = array[j]
-//                     }
-//                   let urls = xzhxzh.match(/(((ftp|https?):\/\/)[\-\w@:%_\+.~#?,!&\/\/=]+)/g)
-//                      tall(urls[0], {
-//                       method: 'HEAD',
-//                       maxRedirect: 5
-//                     }).then(function(unshortenedUrl){ 
-//                       console.log('unshortenedUrl--1: ', unshortenedUrl);
-//                     if(unshortenedUrl.match(/amazon.in/g)){
-//                       console.log('unshortenedUrl--2: ', unshortenedUrl);
-//                       let tagnot;
-//                       if(unshortenedUrl.match(/earnkaro/g)){
-//                         let finalLink =unshortenedUrl.split('dl=');
-//                          if(urlencode(finalLink[1]).match(/[?]/g)){
-//                           tagnot= urlencode(finalLink[1]).concat('&tag='+req.body.postTagId);
-//                         }else{
-//                           tagnot= urlencode(finalLink[1]).concat('?tag='+req.body.postTagId);
-//                         }
-//                       }else if(unshortenedUrl.match(/paisawapas/g)){
-//                           let finalLink =unshortenedUrl.split('url=');
-//                            if(urlencode(finalLink[1]).match(/[?]/g)){
-//                             tagnot= urlencode(finalLink[1]).concat('&tag='+req.body.postTagId);
-//                           }else{
-//                             tagnot= urlencode(finalLink[1]).concat('?tag='+req.body.postTagId);
-//                           }
-//                         } else if(unshortenedUrl.match(/tag/g)){
-//                     let finalLink =unshortenedUrl.split('&');
-//                     for (let h = 0; h < finalLink.length; h++) {
-//                       if(finalLink[h].match(/[?]/g)){
-//                         if(finalLink[h].match(/tag/g)){
-//                           let finalLinkssd =finalLink[h].split('?');
-//                           finalLink[h] = finalLinkssd[0].concat('?tag='+req.body.postTagId)
-//                         }
-//                       }else if(finalLink[h].match(/^ascsubtag/g)){
-//                         finalLink[h] = 'demoyou'
-//                       }else if(finalLink[h].match(/^ascsub/g)){
-//                         finalLink[h] = 'demoyou'
-//                       }else if(finalLink[h].match(/^tag/g)){
-//                         finalLink[h] = 'tag='+req.body.postTagId
-//                       }
-//                     }
-//                      tagnot= finalLink.join('&').replace(/@/g, '');
-//                     }else{
-//                      tagnot= unshortenedUrl.replace(/@/g, '').concat('&tag='+req.body.postTagId);
-//                     }
-//                    example(tagnot.replace(/&demoyou/g, ''));
-//                         async function example(dddd) {
-//                           let response =await bitly.shorten(dddd);
-//                         final[j] = array[j].replace(urls[0].replace(/@/g, ' ').trim(),response.link).replace(/.#x...../g,' %E2%99%A8 ').concat("\n").replace(/&/g, 'and').replace(/;/g, ' ');
-//                         console.log('final[j]2: ', final[j]);
-//                       }
-//                     }else{
-//                       tall(unshortenedUrl, {
-//                         method: 'HEAD',
-//                         maxRedirect: 5
-//                       }).then(function(unshortenedUrl){ 
-//                         console.log('unshortenedUrl: ', unshortenedUrl);
-                    
-//                       if(unshortenedUrl.match(/amazon.in/g)){
-//                         let tagnot;
-//                         if(unshortenedUrl.match(/tag/g)){
-//                       let finalLink =unshortenedUrl.split('&');
-//                      for (let h = 0; h < finalLink.length; h++) {
-//                       if(finalLink[h].match(/[?]/g)){
-//                         if(finalLink[h].match(/tag/g)){
-//                           let finalLinkssd =finalLink[h].split('?');
-//                           finalLink[h] = finalLinkssd[0].concat('?tag='+req.body.postTagId)
-//                         }
-//                       }else if(finalLink[h].match(/^ascsubtag/g)){
-//                         finalLink[h] = 'demoyou'
-//                       }else if(finalLink[h].match(/^ascsub/g)){
-//                         finalLink[h] = 'demoyou'
-//                       }else if(finalLink[h].match(/^tag/g)){
-//                         finalLink[h] = 'tag='+req.body.postTagId
-//                       }
-//                     }
-//                      tagnot= finalLink.join('&').replace(/@/g, '');
-//                     }else{
-//                      tagnot= unshortenedUrl.replace(/@/g, '').concat('&tag='+req.body.postTagId);
-//                     }
-//                    example(tagnot.replace(/&demoyou/g, ''));
-//                           async function example(dddd) {
-//                             let response =await bitly.shorten(dddd);
-//                           final[j] = array[j].replace(urls[0].replace(/@/g, ' ').trim(),response.link).replace(/.#x...../g,' %E2%99%A8 ').concat("\n").replace(/&/g, 'and').replace(/;/g, ' ');
-//                           console.log('final[j]2: ', final[j]);
-//                         }
-//                       }else{
-//                         // let finalLink =unshortenedUrl.split('?');
-//                         // final[j] = array[j].replace("["+urls[0].replace(/@/g, ' ').trim()+"]",finalLink[0]).replace(/.#x...../g,' %E2%99%A8 ').replace(/&/g, 'and').replace(/;/g, ' ');
-//                         final[j] = ' ';
-//                       }
-//                     })
-//                     .catch(function(err){ console.error('AAAW 👻', err)})
-//                     }
-//                       })
-//                       .catch(function(err){ console.error('AAAW 👻', err)})
-//                 }else{
-//                   final[j] = array[j].replace(/&#xA0;/g,' ').replace(/.#x...../g,' %E2%99%A8 ').replace(/[[\]]/g,'').replace(/&/g, 'and').replace(/;/g, ' ').replace(/#/g, '').replace(/^\s+|\s+$|\s+(?=\s)/g, '');
-//                 }
-//               }
-//                setTimeout(()=>{
-//                  let finalAmazon = final.join('\n');
-//                  console.log('finalAmazon: ', finalAmazon);
-//                if(finalAmazon.match(/amzn.to/g)){
-//               nextCall(null, urlencodedd(finalAmazon));
-//              }
-//                },Math.ceil(array.length/2)*6000);
-//             }
-//     ], function (err, response) {
-//     if (err) {
-//       return res.send({
-//         status: err.code ? err.code : 400,
-//         message: (err && err.msg) || "someyhing went wrong"
-//       });
-//     }
-//     return res.send({
-//       status_code: 200,
-//       message: "telegrame post create sucessfully",
-//       data: response
-//     });
-//   })
-// })
 
 function conurlencode(str) {
   return str.replace(/%21/g,'!').replace(/%22/g,'"').replace(/%26/g,'&')
@@ -1745,16 +2119,12 @@ const result = await resolveAfter2Seconds(i);
         }
     
 	  request({
-           uri: "http://localhost:8100/send-message",
+      uri: "http://localhost:8100/send-message",
 	    method: "POST",
 	    body: JSON.stringify(linkRequest1),
 	    headers: requestHeaders1
 	  }, (err, response, body) => {
- console.log('response11---',response);
-		  
       if( response && response.statusCode != 503){
-	      		  console.log('response',response.statusCode);
-
 	      let link = JSON.parse(body);
       }
 	  })
@@ -1878,11 +2248,7 @@ const result = await resolveAfter2Seconds(i);
     body: JSON.stringify(linkRequest1),
     headers: requestHeaders1
   }, (err, response, body) => {
- console.log('response22---',response);
-	  
     if( response && response.statusCode != 503){
-	    		  console.log('response22222',response.statusCode);
-
       let link = JSON.parse(body);
     }
   })
@@ -1994,16 +2360,12 @@ const result = await resolveAfter2Seconds(i);
         }
     
 	  request({
-            uri: "http://localhost:8100/send-message",
+      uri: "http://localhost:8100/send-message",
 	    method: "POST",
 	    body: JSON.stringify(linkRequest1),
 	    headers: requestHeaders1
 	  }, (err, response, body) => {
- console.log('response333---',response);
-		  
       if( response && response.statusCode != 503){
-	      		  console.log('response3333',response.statusCode);
-
         let link = JSON.parse(body);
       }
 	  })
@@ -2113,16 +2475,12 @@ const result = await resolveAfter2Seconds(i);
         }
     
 	  request({
-            uri: "http://localhost:8200/send-message",
+      uri: "http://localhost:8200/send-message",
 	    method: "POST",
 	    body: JSON.stringify(linkRequest1),
 	    headers: requestHeaders1
 	  }, (err, response, body) => {
- console.log('response444---',response);
-
       if( response && response.statusCode != 503){
-	      		  console.log('response444444',response.statusCode);
-
         let link = JSON.parse(body);
       }
 	  })
@@ -2476,6 +2834,60 @@ router.delete('/api/deleteAllInOneData/:id', function (req, res) {
       message: "deleted recored sucessfully",
       data: response
     });
+  });
+});
+
+router.post('/getAllInOneData', function (req, res) {
+  var response = {
+    "recordsTotal": 0,
+    "recordsFiltered": 0,
+    "data": []
+  };
+  async.waterfall([
+    function (nextCall) {
+      var sql = "Select count(*) as TotalCount from ??";
+      connection.query(sql, ['post_telegram'], function (err, rides) {
+        if (err) {
+          console.log('11');
+          return nextCall({
+            "message": "something went wrong",
+          });
+        }
+        response.recordsTotal = rides[0].TotalCount;
+        response.recordsFiltered = rides[0].TotalCount
+        nextCall(null, rides[0].TotalCount);
+      })
+    }, function (counts, nextCall) {
+      startNum = parseInt(req.body.start) || 0;
+      LimitNum = parseInt(req.body.length) || 10;
+      var query = "Select * from ?? ORDER BY id DESC limit ? OFFSET ?";
+      connection.query(query, ["post_telegram", LimitNum, startNum], function (err, ridess) {
+        if (err) {
+          return nextCall({
+            "message": "something went wrong",
+          });
+        } else if (ridess.length > 0) {
+          let final =[];
+           for (let j = 0; j < ridess.length; j++) {
+            final.push({id:j+1,watts_data:urlencodedd(ridess[j].data)})
+           }
+          response.data = final;
+          nextCall();
+        } else {
+          return nextCall({
+            "message": "something went wrong",
+          });
+        }
+      })
+    }
+  ], function (err) {
+    if (err) {
+      return res.send({
+        status: err.code ? err.code : 400,
+        message: (err && err.msg) || "someyhing went wrong"
+      });
+    }
+    return res.send(response);
   });
 });
 
