@@ -335,7 +335,41 @@ function tagChangeRandoms(AmazonMsg){
   const months = flagData;
   const randomMonth = months[Math.floor(Math.random() * months.length)];
  
+  tagChangeRandomsUpdate(randomMonth.tag_name);
+  tagChangeRandomsUpdate(randomMonth.tag_name);
+   let requestHeaders1 = {
+      "Content-Type": "application/json",
+      "accept": "application/json"
+    }
+    let linkRequest1 = {
+      "org_post_tag": randomMonth.tag_name
+    }
+    request({
+      uri: "https://postmanual7.herokuapp.com/tagChangePostAmazon",
+      method: "POST",
+      body: JSON.stringify(linkRequest1),
+      headers: requestHeaders1
+    }, (err, response, body) => {
+      console.log('body: ', body);
+      let link = JSON.parse(body);
+    })
   tagChangeRandomsUpdate(randomMonth.tag_name); 
+   let requestHeaders1 = {
+      "Content-Type": "application/json",
+      "accept": "application/json"
+    }
+    let linkRequest1 = {
+      "org_post_tag": randomMonth.tag_name
+    }
+    request({
+      uri: "https://postmanual7.herokuapp.com/tagChangePostAmazon",
+      method: "POST",
+      body: JSON.stringify(linkRequest1),
+      headers: requestHeaders1
+    }, (err, response, body) => {
+      console.log('body: ', body);
+      let link = JSON.parse(body);
+    })
   })
 }
 
@@ -2119,7 +2153,7 @@ const result = await resolveAfter2Seconds(i);
         }
     
 	  request({
-      uri: "http://localhost:8100/send-message",
+      uri: "https://wp-tutorial-master0.onrender.com/send-message",
 	    method: "POST",
 	    body: JSON.stringify(linkRequest1),
 	    headers: requestHeaders1
@@ -2243,7 +2277,7 @@ const result = await resolveAfter2Seconds(i);
       }
  
   request({
-    uri: "http://localhost:8200/send-message",
+    uri: "https://wp-tutorial-master1.onrender.com/send-message",
     method: "POST",
     body: JSON.stringify(linkRequest1),
     headers: requestHeaders1
@@ -2360,7 +2394,7 @@ const result = await resolveAfter2Seconds(i);
         }
     
 	  request({
-      uri: "http://localhost:8100/send-message",
+      uri: "https://wp-tutorial-master0.onrender.com/send-media",
 	    method: "POST",
 	    body: JSON.stringify(linkRequest1),
 	    headers: requestHeaders1
@@ -2475,7 +2509,7 @@ const result = await resolveAfter2Seconds(i);
         }
     
 	  request({
-      uri: "http://localhost:8200/send-message",
+      uri: "https://wp-tutorial-master1.onrender.com/send-media",
 	    method: "POST",
 	    body: JSON.stringify(linkRequest1),
 	    headers: requestHeaders1
