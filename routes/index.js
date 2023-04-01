@@ -335,41 +335,7 @@ function tagChangeRandoms(AmazonMsg){
   const months = flagData;
   const randomMonth = months[Math.floor(Math.random() * months.length)];
  
-  tagChangeRandomsUpdate(randomMonth.tag_name);
-  tagChangeRandomsUpdate(randomMonth.tag_name);
-   let requestHeaders1 = {
-      "Content-Type": "application/json",
-      "accept": "application/json"
-    }
-    let linkRequest1 = {
-      "org_post_tag": randomMonth.tag_name
-    }
-    request({
-      uri: "https://postmanual7.herokuapp.com/tagChangePostAmazon",
-      method: "POST",
-      body: JSON.stringify(linkRequest1),
-      headers: requestHeaders1
-    }, (err, response, body) => {
-      console.log('body: ', body);
-      let link = JSON.parse(body);
-    })
   tagChangeRandomsUpdate(randomMonth.tag_name); 
-   let requestHeaders1 = {
-      "Content-Type": "application/json",
-      "accept": "application/json"
-    }
-    let linkRequest1 = {
-      "org_post_tag": randomMonth.tag_name
-    }
-    request({
-      uri: "https://postmanual7.herokuapp.com/tagChangePostAmazon",
-      method: "POST",
-      body: JSON.stringify(linkRequest1),
-      headers: requestHeaders1
-    }, (err, response, body) => {
-      console.log('body: ', body);
-      let link = JSON.parse(body);
-    })
   })
 }
 
