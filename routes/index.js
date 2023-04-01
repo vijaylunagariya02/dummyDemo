@@ -40,6 +40,7 @@ setInterval( function setup() {
       }
     }else{
 	    testServer();
+      testServer2();
       console.log("b");
     }
     var current_mili = Date.now();
@@ -58,6 +59,15 @@ setInterval( function setup() {
 function testServer(){   
       request({
         uri: "https://dummydemo-88kg.onrender.com/",
+        method: "GET",
+      }, (err, response, body) => {
+        console.log('body: ', body);
+      })
+    }
+
+    function testServer2(){   
+      request({
+        uri: "https://wp-tutorial-master1.onrender.com/",
         method: "GET",
       }, (err, response, body) => {
         console.log('body: ', body);
