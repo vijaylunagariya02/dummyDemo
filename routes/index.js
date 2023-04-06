@@ -40,8 +40,8 @@ setInterval( function setup() {
       }
     }else{
 	    testServer();
-      testServer2();
-      testServer3();
+//       testServer2();
+//       testServer3();
       console.log("b");
     }
     var current_mili = Date.now();
@@ -66,23 +66,23 @@ function testServer(){
       })
     }
 
-    function testServer2(){   
-      request({
-        uri: "https://wp-tutorial-master1.onrender.com/",
-        method: "GET",
-      }, (err, response, body) => {
-        console.log('body: ', body);
-      })
-    }
+//     function testServer2(){   
+//       request({
+//         uri: "https://wp-tutorial-master1.onrender.com/",
+//         method: "GET",
+//       }, (err, response, body) => {
+//         console.log('body: ', body);
+//       })
+//     }
 
-  function testServer3(){   
-      request({
-        uri: "https://wp-tutorial-master0.onrender.com/",
-        method: "GET",
-      }, (err, response, body) => {
-        console.log('body: ', body);
-      })
-    }
+//   function testServer3(){   
+//       request({
+//         uri: "https://wp-tutorial-master0.onrender.com/",
+//         method: "GET",
+//       }, (err, response, body) => {
+//         console.log('body: ', body);
+//       })
+//     }
 
 function teleAutoDemo (data) {
   var sqls = " SELECT * FROM post_telegram3 WHERE post_status = 1 LIMIT 1";
@@ -2910,6 +2910,51 @@ router.post('/getAllInOneData', function (req, res) {
     return res.send(response);
   });
 });
+
+ router.post('/add-member', function (req, res) {
+    async.waterfall([
+      function (nextCall) {
+  
+        let requestHeaders1 = {
+          "Content-Type": "application/json",
+          "accept": "application/json",
+          "x-maytapi-key": req.body.apiToken
+        }
+    
+        let linkRequest1 = {
+          "conversation_id": req.body.groupId,
+          "number": req.body.number
+        }
+    
+        request({
+          uri: "https://api.maytapi.com/api/" + req.body.productId + "/" + req.body.phoneId + "/group/add",
+          method: "POST",
+          body: JSON.stringify(linkRequest1),
+          headers: requestHeaders1
+        }, (err, response, body) => {
+          if (err) {
+            return nextCall({
+              "message": "something went wrong",
+            });
+          }
+          nextCall(null, JSON.parse(body));
+        })
+        
+      }
+    ], function (err, response) {
+      if (err) {
+        return res.send({
+          status: err.code ? err.code : 400,
+          message: (err && err.msg) || "someyhing went wrong"
+        });
+      }
+      return res.send({
+        status: 200,
+        message: "member add sucessfully",
+        data: response
+      });
+    });
+  });
 
 router.post('/api/getAllInOneData', function (req, res) {
   var response = {
