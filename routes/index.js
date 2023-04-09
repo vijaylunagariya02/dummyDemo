@@ -21,7 +21,6 @@ const unshort = require('url-unshorten');
 var moment = require('moment');
 var btoa = require('btoa');
 
-
 router.get('/', function(req, res, next) {
   res.send('respond with a resource');
 }); 
