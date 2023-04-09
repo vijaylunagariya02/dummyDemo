@@ -555,6 +555,47 @@ router.post('/tagChangePostFlags', function (req, res) {
   });
 });
 
+router.post('/api/unconvert_posts_forward', function (req, res, next) {
+  async.waterfall([
+    function (nextCall) {
+      let sqlsss = "SELECT * FROM post_flags";
+      connection.query(sqlsss, function (err, flagData) {
+        if (err) {
+          console.log('err: ', err);
+        }
+        let ListflagData = flagData[0];
+        let bufferObj = Buffer.from(req.body.convertText, "utf8");
+        let base64String = bufferObj.toString("base64");
+        let finalAmazon = {
+          "plateform":"adminPanelPost",
+          "telegram": req.body.teleSendFlag,
+          "whatsapp": req.body.WattsSendFlag,
+          "convert": req.body.convertFlag,
+          "type": req.body.postType,
+          "url": btoa(req.body.postImg),
+          "msg": base64String
+        } ;
+
+        teleAutoname(JSON.stringify(finalAmazon),'@zzwpbotposting',ListflagData.bestshopping_token);
+
+        nextCall(null, req.body.convertText);
+        })
+    }
+    ], function (err, response) {
+    if (err) {
+      return res.send({
+        status: err.code ? err.code : 400,
+        message: (err && err.msg) || "someyhing went wrong"
+      });
+    }
+    return res.send({
+      status_code: 200,
+      message: "telegrame post create sucessfully",
+      data: response
+    });
+  })
+});
+
 router.post('/api/tagChangePostFlags', function (req, res) {
   async.waterfall([
     function (nextCall) {
