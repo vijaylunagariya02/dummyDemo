@@ -19,6 +19,7 @@ var isUserAuthenticatedPolicy = require('../policies/isUserAuthenticated.js');
 var jwt = require('jsonwebtoken');
 const unshort = require('url-unshorten');
 var moment = require('moment');
+var btoa = require('btoa');
 
 
 router.get('/', function(req, res, next) {
