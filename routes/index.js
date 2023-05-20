@@ -1029,6 +1029,81 @@ router.post('/api/addtokenData', function (req, res) {
   });
 });
 
+router.post('/api/addTotalNumberData', function (req, res) {
+  async.waterfall([
+    function (nextCall) {
+      values =   [ [
+                   req.body.mob_number,
+                   req.body.total_number,
+                   req.body.assign_id,
+                   req.body.api_token,
+                   req.body.api_productid,
+                   req.body.api_phoneid,
+                   req.body.email
+                ] ]
+      let sqlss = "INSERT INTO diff_net_posts (mob_number,total_number,assign_id,api_token,api_productid,api_phoneid,email) VALUES ?";
+      connection.query(sqlss, [values], function (err, rides) {
+        if (err) {
+          return nextCall({
+            "message": "something went wrong",
+          });
+        }
+        nextCall(null, rides[0]);
+      })
+    }
+  ], function (err, response) {
+    if (err) {
+      return res.send({
+        status: err.code ? err.code : 400,
+        message: (err && err.msg) || "someyhing went wrong"
+      });
+    }
+    return res.send({
+      status: 200,
+      message: "add post create sucessfully",
+      data: response
+    });
+  });
+});
+
+router.post('/api/editTotalNumberData', function (req, res) {
+  async.waterfall([
+    function (nextCall) {
+      values =  [
+                   req.body.mob_number,
+                   req.body.total_number,
+                   req.body.assign_id,
+                   req.body.api_token,
+                   req.body.api_productid,
+                   req.body.api_phoneid,
+                   req.body.email,
+                   req.body.id,
+                ]
+      var sqlss = "UPDATE total_mobile_number set mob_number =? ,total_number =? , assign_id =?,api_token =? , api_productid =? , api_phoneid =? , email =? WHERE id = ?";
+      connection.query(sqlss, values, function (err, rides) {
+        if (err) {
+          return nextCall({
+            "message": "something went wrong",
+          });
+        }
+        nextCall(null, rides[0]);
+      })
+    }
+  ], function (err, response) {
+    if (err) {
+      return res.send({
+        status: err.code ? err.code : 400,
+        message: (err && err.msg) || "someyhing went wrong"
+      });
+    }
+    return res.send({
+      status: 200,
+      message: "Edit post create sucessfully",
+      data: response
+    });
+  });
+});
+
 router.post('/api/editAllInOneData', function (req, res) {
   async.waterfall([
     function (nextCall) {
@@ -3049,5 +3124,55 @@ router.post('/api/getAllInOneData', function (req, res) {
   });
 });
 
+router.post('/api/getTotalNumberData', function (req, res) {
+  var response = {
+    "draw": req.body.draw || 0,
+    "recordsTotal": 0,
+    "recordsFiltered": 0,
+    "data": []
+  };
+  async.waterfall([
+    function (nextCall) {
+      var sql = "Select count(*) as TotalCount from ??";
+      connection.query(sql, ['total_mobile_number'], function (err, rides) {
+        if (err) {
+          console.log('11');
+          return nextCall({
+            "message": "something went wrong",
+          });
+        }
+        response.recordsTotal = rides[0].TotalCount;
+        response.recordsFiltered = rides[0].TotalCount
+        nextCall(null, rides[0].TotalCount);
+      })
+    }, function (counts, nextCall) {
+      startNum = parseInt(req.body.start) || 0;
+      LimitNum = parseInt(req.body.length) || 10;
+      var query = "Select * from ?? WHERE " + req.body.columns[req.body.order[0].column].data + " LIKE '%" + req.body.search.value + "%' ORDER BY " + req.body.columns[req.body.order[0].column].data + ' ' + req.body.order[0].dir + " limit ? OFFSET ?";
+      connection.query(query, ["total_mobile_number", LimitNum, startNum], function (err, ridess) {
+        if (err) {
+          return nextCall({
+            "message": "something went wrong",
+          });
+        } else if (ridess.length > 0) {
+          response.data = ridess;
+          nextCall();
+        } else {
+          return nextCall({
+            "message": "something went wrong",
+          });
+        }
+      })
+    }
+  ], function (err) {
+    if (err) {
+      return res.send({
+        status: err.code ? err.code : 400,
+        message: (err && err.msg) || "someyhing went wrong"
+      });
+    }
+    return res.send(response);
+  });
+});
 
 module.exports = router;
