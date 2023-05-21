@@ -1041,7 +1041,7 @@ router.post('/api/addTotalNumberData', function (req, res) {
                    req.body.api_phoneid,
                    req.body.email
                 ] ]
-      let sqlss = "INSERT INTO diff_net_posts (mob_number,total_number,assign_id,api_token,api_productid,api_phoneid,email) VALUES ?";
+      let sqlss = "INSERT INTO total_mobile_number (mob_number,total_number,assign_id,api_token,api_productid,api_phoneid,email) VALUES ?";
       connection.query(sqlss, [values], function (err, rides) {
         if (err) {
           return nextCall({
