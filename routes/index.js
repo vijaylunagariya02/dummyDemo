@@ -1033,6 +1033,7 @@ router.post('/api/addTotalNumberData', function (req, res) {
   async.waterfall([
     function (nextCall) {
       values =   [ [
+                   req.body.name,
                    req.body.mob_number,
                    req.body.total_number,
                    req.body.assign_id,
@@ -1041,7 +1042,7 @@ router.post('/api/addTotalNumberData', function (req, res) {
                    req.body.api_phoneid,
                    req.body.email
                 ] ]
-      let sqlss = "INSERT INTO total_mobile_number (mob_number,total_number,assign_id,api_token,api_productid,api_phoneid,email) VALUES ?";
+      let sqlss = "INSERT INTO total_mobile_number (name,mob_number,total_number,assign_id,api_token,api_productid,api_phoneid,email) VALUES ?";
       connection.query(sqlss, [values], function (err, rides) {
         if (err) {
           return nextCall({
@@ -1070,6 +1071,7 @@ router.post('/api/editTotalNumberData', function (req, res) {
   async.waterfall([
     function (nextCall) {
       values =  [
+                   req.body.name,
                    req.body.mob_number,
                    req.body.total_number,
                    req.body.assign_id,
@@ -1079,7 +1081,7 @@ router.post('/api/editTotalNumberData', function (req, res) {
                    req.body.email,
                    req.body.id,
                 ]
-      var sqlss = "UPDATE total_mobile_number set mob_number =? ,total_number =? , assign_id =?,api_token =? , api_productid =? , api_phoneid =? , email =? WHERE id = ?";
+      var sqlss = "UPDATE total_mobile_number set name =? ,mob_number =? ,total_number =? , assign_id =?,api_token =? , api_productid =? , api_phoneid =? , email =? WHERE id = ?";
       connection.query(sqlss, values, function (err, rides) {
         if (err) {
           return nextCall({
@@ -2916,6 +2918,34 @@ router.get('/api/singleAllInOneData/:id', function (req, res) {
   });
 });
 
+router.get('/api/singleTotalNumberData/:id', function (req, res) {
+  async.waterfall([
+    function (nextCall) {
+      var sqlss = " SELECT * FROM total_mobile_number WHERE id =" + req.params.id;
+      connection.query(sqlss, function (err, rides) {
+        if (err) {
+          return nextCall({
+            "message": "something went wrong",
+          });
+        }
+        nextCall(null, rides[0]);
+      })
+    }
+  ], function (err, response) {
+    if (err) {
+      return res.send({
+        status: err.code ? err.code : 400,
+        message: (err && err.msg) || "someyhing went wrong"
+      });
+    }
+    return res.send({
+      status: 200,
+      message: "Single recored sucessfully",
+      data: response
+    });
+  });
+});
+
 router.get('/api/singleBitlyData', function (req, res) {
   async.waterfall([
     function (nextCall) {
@@ -2949,6 +2979,34 @@ router.delete('/api/deleteAllInOneData/:id', function (req, res) {
   async.waterfall([
     function (nextCall) {
       var sqlss = " DELETE FROM diff_net_posts WHERE id =" + req.params.id;
+      connection.query(sqlss, function (err, rides) {
+        if (err) {
+          return nextCall({
+            "message": "something went wrong",
+          });
+        }
+        nextCall(null, rides[0]);
+      })
+    }
+  ], function (err, response) {
+    if (err) {
+      return res.send({
+        status: err.code ? err.code : 400,
+        message: (err && err.msg) || "someyhing went wrong"
+      });
+    }
+    return res.send({
+      status: 200,
+      message: "deleted recored sucessfully",
+      data: response
+    });
+  });
+});
+
+router.delete('/api/deleteTotalNumberData/:id', function (req, res) {
+  async.waterfall([
+    function (nextCall) {
+      var sqlss = " DELETE FROM total_mobile_number WHERE id =" + req.params.id;
       connection.query(sqlss, function (err, rides) {
         if (err) {
           return nextCall({
