@@ -3085,7 +3085,52 @@ router.post('/getAllInOneData', function (req, res) {
   });
 });
 
- router.post('/add-member', function (req, res) {
+router.post('/add-member', function (req, res) {
+    async.waterfall([
+      function (nextCall) {
+  
+        let requestHeaders1 = {
+          "Content-Type": "application/json",
+          "accept": "application/json"
+        }
+    
+        let linkRequest1 = {
+          "groupId": req.body.groupId,
+          "participantChatId": req.body.number
+        }
+    
+        request({
+          // uri: "https://api.maytapi.com/api/" + req.body.productId + "/" + req.body.phoneId + "/group/add",
+          uri: `https://api.green-api.com/waInstance`+req.body.phoneId+`/addGroupParticipant/`+req.body.productId,
+          method: "POST",
+          body: JSON.stringify(linkRequest1),
+          headers: requestHeaders1
+        }, (err, response, body) => {
+          if (err) {
+            return nextCall({
+              "message": "something went wrong",
+            });
+          }
+          nextCall(null, JSON.parse(body));
+        })
+        
+      }
+    ], function (err, response) {
+      if (err) {
+        return res.send({
+          status: err.code ? err.code : 400,
+          message: (err && err.msg) || "someyhing went wrong"
+        });
+      }
+      return res.send({
+        status: 200,
+        message: "member add sucessfully",
+        data: response
+      });
+    });
+  });
+
+ router.post('/add-members', function (req, res) {
     async.waterfall([
       function (nextCall) {
   
