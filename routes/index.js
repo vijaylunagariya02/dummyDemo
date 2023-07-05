@@ -1079,9 +1079,10 @@ router.post('/api/editTotalNumberData', function (req, res) {
                    req.body.api_productid,
                    req.body.api_phoneid,
                    req.body.email,
+                   req.body.vcard_status,
                    req.body.id,
                 ]
-      var sqlss = "UPDATE total_mobile_number set name =? ,mob_number =? ,total_number =? , assign_id =?,api_token =? , api_productid =? , api_phoneid =? , email =? WHERE id = ?";
+      var sqlss = "UPDATE total_mobile_number set name =? ,mob_number =? ,total_number =? , assign_id =?,api_token =? , api_productid =? , api_phoneid =? , email =? , vcard_status =? WHERE id = ?";
       connection.query(sqlss, values, function (err, rides) {
         if (err) {
           return nextCall({
