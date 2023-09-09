@@ -25,6 +25,49 @@ router.get('/', function(req, res, next) {
   res.send('respond with a resource');
 }); 
 
+router.get('/link-extract', function (req, res) {
+    async.waterfall([
+      function (nextCall) {
+        axios('https://telegram.me/s/zzwpbotposting')
+        .then(response => {
+            var html = response.data;
+            var $ = cheerio.load(html);
+            var matchObj = [];
+
+            $('.tgme_widget_message_wrap').each((i, el) => {
+              var photoWithData = $(el).find('.tgme_widget_message_photo_wrap').attr('style');
+              let photoOnly = photoWithData;
+
+              if(photoWithData != undefined){
+                const seprateData =  photoWithData.split("image:url('");
+                photoOnly =  seprateData[1].slice(0,-2).replace(/telesco.pe/g, 'telegram-cdn.org');
+              }
+              var linkss = $(el).find('.tgme_widget_message_footer').find('a').attr('href').split('/');
+              var link = htmlToText.fromString($(el).find('.tgme_widget_message_text').html());
+              matchObj.push({ id: Number(linkss[4]), text_data: emmoji(link),text_img :photoOnly })
+            });
+            nextCall(null, matchObj);
+        }).catch(function(error) {
+          return nextCall({
+            "message": "something went wrong",
+          });
+        })
+      }
+    ], function (err, response) {
+      if (err) {
+        return res.send({
+          status: err.code ? err.code : 400,
+          message: (err && err.msg) || "someyhing went wrong"
+        });
+      }
+      return res.send({
+        status: 200,
+        message: "member add sucessfully",
+        data: response
+      });
+    });
+});
+
 setInterval( function setup() {
   let sqlsss = "SELECT * FROM post_flags";
   connection.query(sqlsss, function (err, tagChangeRandom) {
