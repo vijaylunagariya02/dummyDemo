@@ -68,10 +68,42 @@ router.get('/link-extract', function (req, res) {
     });
 });
 
+function toJSONLocal(date1) {
+    const date = new Date(date1);
+    const offset = date.getTimezoneOffset() == 0 ? 0 : -1 * date.getTimezoneOffset();
+    let normalized = new Date(date.getTime() + (offset) * 60000);
+    let indiaTime = new Date(normalized.toLocaleString("en-US", {timeZone: "Asia/Calcutta"}));
+    return indiaTime.toJSON().slice(0, 10);
+}
+
+function postDateUpdate(date){
+    values =  [
+        1,
+        date
+    ]
+    var sqls = "UPDATE post_flags set twitter_post_number =? ,twitter_date =? WHERE id = 1";
+    connection.query(sqls, values, function (err, rides) {
+    if (err) {
+        return nextCall({
+        "message": "something went wrong",
+        });
+    }
+    })
+}
+
 setInterval( function setup() {
   let sqlsss = "SELECT * FROM post_flags";
   connection.query(sqlsss, function (err, tagChangeRandom) {
     console.log('tagChangeRandom: ', tagChangeRandom[0].tag_switch);
+	let storeDate = toJSONLocal(tagChangeRandom[0].twitter_date);
+	let storeDateTime = new Date(storeDate).valueOf();
+	const date1 = new Date();
+	let currentDate = toJSONLocal(date1);
+	let curerentDateTime = new Date(currentDate).valueOf();
+	if(storeDateTime !=  curerentDateTime){
+            console.log("inside");
+	    postDateUpdate(currentDate)
+	}
     var a = moment().utcOffset("+05:30").format("HH:mm");
     if(a == "02:00"||a == "04:00"||a == "06:00"||a == "08:00"||a == "10:00"||a == "12:00"||a == "14:00"||a == "16:00"||a == "18:00"||a == "20:00"||a == "22:00"||a == "23:59" ){
       console.log("a");
