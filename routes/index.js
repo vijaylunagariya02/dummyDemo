@@ -25,6 +25,42 @@ router.get('/', function(req, res, next) {
   res.send('respond with a resource');
 }); 
 
+router.get('/treddata', function (req, res) {
+  async.waterfall([
+    function (nextCall) {
+      let data = {
+        "status": "success",
+        "data": {
+            "candles": [
+                [
+                    "2024-01-01T00:00:00+05:30",
+                    140,
+                    140.95,
+                    139.05,
+                    139.85,
+                    21186105,
+                    0
+                ]
+            ]
+        }
+    }
+        nextCall(null, data);
+    }
+  ], function (err, response) {
+    if (err) {
+      return res.send({
+        status: err.code ? err.code : 400,
+        message: (err && err.msg) || "someyhing went wrong"
+      });
+    }
+    return res.send({
+      status: 200,
+      message: "Single recored sucessfully",
+      data: response
+    });
+  });
+});
+
 router.get('/link-extract', function (req, res) {
     async.waterfall([
       function (nextCall) {
