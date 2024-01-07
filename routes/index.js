@@ -28,22 +28,40 @@ router.get('/', function(req, res, next) {
 router.get('/treddata', function (req, res) {
   async.waterfall([
     function (nextCall) {
-      let data = {
-        "status": "success",
-        "data": {
-            "candles": [
-                [
-                    "2024-01-01T00:00:00+05:30",
-                    140,
-                    140.95,
-                    139.05,
-                    139.85,
-                    21186105,
-                    0
-                ]
-            ]
-        }
-    }
+	  let data = {
+	    "status": "success",
+	   "data": {
+	      "candles": [
+	        {
+	          "date": "2024-01-01T00:00:00+05:30",
+	          "open": 140,
+	          "high": 140.95,
+	          "low": 139.05,
+	          "close": 139.85,
+	          "vol": 21186105,
+	          "oi": 0
+	        },
+	        {
+	          "date": "2023-12-29T00:00:00+05:30",
+	          "open": 138.6,
+	          "high": 141.25,
+	          "low": 137.15,
+	          "close": 139.6,
+	          "vol": 49202910,
+	          "oi": 0
+	        },
+	        {
+	          "date": "2023-12-28T00:00:00+05:30",
+	          "open": 138.15,
+	          "high": 138.75,
+	          "low": 136.85,
+	          "close": 138.15,
+	          "vol": 34661176,
+	          "oi": 0
+	        }
+	      ]
+	    }
+	  }
         nextCall(null, data);
     }
   ], function (err, response) {
