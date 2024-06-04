@@ -350,7 +350,7 @@ setInterval( function setup() {
 
 function testServer(){   
       request({
-        uri: "https://dummydemo-88kg.onrender.com/",
+        uri: "https://dummydemo-mdu6.onrender.com/",
         method: "GET",
       }, (err, response, body) => {
         console.log('body: ', body);
