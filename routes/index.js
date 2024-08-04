@@ -331,7 +331,7 @@ setInterval( function setup() {
       }
     }else{
 	    testServer();
-       testServer2();
+    //   testServer2();
 //       testServer3();
       console.log("b");
     }
@@ -357,14 +357,14 @@ function testServer(){
       })
     }
 
-     function testServer2(){   
-       request({
-        uri: "https://server-for-lo6a.onrender.com/",
-        method: "GET",
-     }, (err, response, body) => {
-        console.log('body: ', body);
-      })
-     }
+     // function testServer2(){   
+     //   request({
+     //    uri: "https://server-for-lo6a.onrender.com/",
+     //    method: "GET",
+     // }, (err, response, body) => {
+     //    console.log('body: ', body);
+     //  })
+     // }
 
 //   function testServer3(){   
 //       request({
