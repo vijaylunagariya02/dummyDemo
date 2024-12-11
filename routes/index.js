@@ -241,6 +241,38 @@ router.get('/treddata', function (req, res) {
   });
 });
 
+router.post('/intervalChangePostFlags', function (req, res) {
+  async.waterfall([
+    function (nextCall) {
+      values =  [
+                   req.body.interval,
+                   req.body.postsPerInterval,
+                ]
+      var sqlss = "UPDATE post_flags set interval =? ,post_per_interval =? WHERE id = 1";
+      connection.query(sqlss, values, function (err, rides) {
+        if (err) {
+          return nextCall({
+            "message": "something went wrong",
+          });
+        }
+        nextCall(null, rides[0]);
+      })
+    }
+  ], function (err, response) {
+    if (err) {
+      return res.send({
+        status: err.code ? err.code : 400,
+        message: (err && err.msg) || "someyhing went wrong"
+      });
+    }
+    return res.send({
+      status: 200,
+      message: "Wahtsapp post schedule interval update sucessfully",
+      data: response
+    });
+  });
+});
+
 router.get('/link-extract', function (req, res) {
     async.waterfall([
       function (nextCall) {
