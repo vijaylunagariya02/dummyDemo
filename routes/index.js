@@ -342,41 +342,42 @@ function postDateUpdate(date){
 setInterval( function setup() {
   let sqlsss = "SELECT * FROM post_flags";
   connection.query(sqlsss, function (err, tagChangeRandom) {
-    console.log('tagChangeRandom: ', tagChangeRandom[0].tag_switch);
-	let storeDate = toJSONLocal(tagChangeRandom[0].twitter_date);
-	let storeDateTime = new Date(storeDate).valueOf();
-	const date1 = new Date();
-	let currentDate = toJSONLocal(date1);
-	let curerentDateTime = new Date(currentDate).valueOf();
-	if(storeDateTime !=  curerentDateTime){
-            console.log("inside");
-	    postDateUpdate(currentDate)
-	}
-    var a = moment().utcOffset("+05:30").format("HH:mm");
-    if(a == "02:00"||a == "04:00"||a == "06:00"||a == "08:00"||a == "10:00"||a == "12:00"||a == "14:00"||a == "16:00"||a == "18:00"||a == "20:00"||a == "22:00"||a == "23:59" ){
-      console.log("a");
-      if(tagChangeRandom[0].tag_switch == "1"){
-        tagChangeRandoms(tagChangeRandom);
-      }else{
-        console.log("sssssssss===");
-        bitlyCheckCount(tagChangeRandom[0].current_bitly);
-      }
-    }else{
-	    testServer();
-    //   testServer2();
-//       testServer3();
-      console.log("b");
-    }
-    var current_mili = Date.now();
-    if(tagChangeRandom[0].autopost_flag_tele == 1){
-      if(Number(current_mili) >= Number(tagChangeRandom[0].last_interval_mili)){
-        console.log("22222");
-        teleAutoDemo(tagChangeRandom[0]);
-      }
-    }
-    if (err) {
+   if (err) {
       console.log('err: ', err);
-    }
+   }else{
+	    console.log('tagChangeRandom: ', tagChangeRandom[0].tag_switch);
+		let storeDate = toJSONLocal(tagChangeRandom[0].twitter_date);
+		let storeDateTime = new Date(storeDate).valueOf();
+		const date1 = new Date();
+		let currentDate = toJSONLocal(date1);
+		let curerentDateTime = new Date(currentDate).valueOf();
+		if(storeDateTime !=  curerentDateTime){
+		    console.log("inside");
+		    postDateUpdate(currentDate)
+		}
+	    var a = moment().utcOffset("+05:30").format("HH:mm");
+	    if(a == "02:00"||a == "04:00"||a == "06:00"||a == "08:00"||a == "10:00"||a == "12:00"||a == "14:00"||a == "16:00"||a == "18:00"||a == "20:00"||a == "22:00"||a == "23:59" ){
+	      console.log("a");
+	      if(tagChangeRandom[0].tag_switch == "1"){
+	        tagChangeRandoms(tagChangeRandom);
+	      }else{
+	        console.log("sssssssss===");
+	        bitlyCheckCount(tagChangeRandom[0].current_bitly);
+	      }
+	    }else{
+		    testServer();
+		    //   testServer2();
+		    //    testServer3();
+		      console.log("b");
+            }
+	    var current_mili = Date.now();
+	    if(tagChangeRandom[0].autopost_flag_tele == 1){
+	      if(Number(current_mili) >= Number(tagChangeRandom[0].last_interval_mili)){
+	        console.log("22222");
+	        teleAutoDemo(tagChangeRandom[0]);
+	      }
+	    }
+   }
       })
 }, 19000)
 
